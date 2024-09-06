@@ -42,3 +42,27 @@ func (q *Queries) CountUniqueItemsInCart(ctx context.Context) (int64, error) {
 	err := row.Scan(&unique_items)
 	return unique_items, err
 }
+
+const findItemInCart = `-- name: FindItemInCart :one
+SELECT EXISTS (
+    SELECT 1
+    FROM cart_items
+    WHERE item_id = $1
+)
+`
+
+func (q *Queries) FindItemInCart(ctx context.Context, itemID int32) (bool, error) {
+	row := q.db.QueryRowContext(ctx, findItemInCart, itemID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const removeItem = `-- name: RemoveItem :exec
+DELETE FROM cart_items WHERE item_id = $1
+`
+
+func (q *Queries) RemoveItem(ctx context.Context, itemID int32) error {
+	_, err := q.db.ExecContext(ctx, removeItem, itemID)
+	return err
+}

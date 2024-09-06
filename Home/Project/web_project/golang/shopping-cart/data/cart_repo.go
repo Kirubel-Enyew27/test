@@ -8,6 +8,8 @@ import (
 
 type CartRepoInterface interface {
 	AddCartItem(ctx context.Context, itemID int32, ItemName string, Price float64, quantity int32) error
+	RemoveItem(ctx context.Context, itemID int) error
+	FindItem(ctx context.Context, itemID int) (bool, error)
 }
 
 type CartRepo struct {
@@ -20,7 +22,7 @@ func NewCartRepo(dbQueries *db.Queries) *CartRepo {
 	}
 }
 
-func (r CartRepo) AddCartItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) error {
+func (r *CartRepo) AddCartItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) error {
 	count, err := r.dbQueries.CountUniqueItemsInCart(ctx)
 	if err != nil {
 		return err
@@ -43,4 +45,21 @@ func (r CartRepo) AddCartItem(ctx context.Context, itemID int32, itemName string
 	}
 
 	return nil
+}
+
+func (r *CartRepo) RemoveItem(ctx context.Context, itemID int) error {
+	err := r.dbQueries.RemoveItem(ctx, int32(itemID))
+	if err != nil {
+		return errors.New("failed to remove item from the cart")
+	}
+	return nil
+}
+
+func (r *CartRepo) FindItem(ctx context.Context, itemID int) (bool, error) {
+	exists, err := r.dbQueries.FindItemInCart(ctx, int32(itemID))
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }

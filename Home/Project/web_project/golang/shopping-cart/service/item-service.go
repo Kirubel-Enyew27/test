@@ -8,6 +8,7 @@ import (
 
 type CartServiceInterface interface {
 	AddItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) error
+	RemoveItem(ctx context.Context, itemID int) error
 }
 
 type CartService struct {
@@ -29,4 +30,22 @@ func (s *CartService) AddItem(ctx context.Context, itemID int32, itemName string
 	}
 
 	return nil
+}
+
+func (s *CartService) RemoveItem(ctx context.Context, itemID int) error {
+	isItemExist, err := s.repo.FindItem(ctx, itemID)
+	if err != nil {
+		return err
+	}
+	if !isItemExist {
+		return errors.New("item not found")
+	}
+
+	err = s.repo.RemoveItem(ctx, itemID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

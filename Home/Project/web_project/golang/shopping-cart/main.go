@@ -20,12 +20,12 @@ func main() {
 	dbQueries := db.New(config.DB)
 	cartRepository := data.NewCartRepo(dbQueries)
 	cartService := service.NewCartService(cartRepository)
-	cartrHandler := handler.NewCartHandler(cartService)
+	cartHandler := handler.NewCartHandler(cartService)
 
 	router := gin.Default()
 
-	router.POST("/cart/add", cartrHandler.AddItem)
-	// router.DELETE("/cart/remove/:productID", handler.RemoveItem)
+	router.POST("/cart/add", cartHandler.AddItem)
+	router.DELETE("/cart/remove/:itemID", cartHandler.RemoveItem)
 	// router.PUT("/cart/update", handler.UpdateItemQuantity)
 	// router.POST("/cart/discount", handler.ApplyDiscount)
 	// router.GET("/cart", handler.ViewCart)

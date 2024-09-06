@@ -6,4 +6,15 @@ VALUES ($1, $2, $3, $4);
 SELECT COUNT(DISTINCT item_id) AS unique_items
 FROM cart_items;
 
+-- name: RemoveItem :exec
+DELETE FROM cart_items WHERE item_id = $1;
+
+-- name: FindItemInCart :one
+SELECT EXISTS (
+    SELECT 1
+    FROM cart_items
+    WHERE item_id = $1
+);
+
+
 

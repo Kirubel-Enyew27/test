@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"shopping-cart/service"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,4 +37,20 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Item added to cart"})
+}
+
+func (h *CartHandler) RemoveItem(c *gin.Context) {
+	itemID, err := strconv.Atoi(c.Param("itemID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID"})
+		return
+	}
+
+	err = h.service.RemoveItem(context.Background(), itemID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Item removed from cart"})
 }
