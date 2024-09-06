@@ -1,5 +1,13 @@
-package data
+package config
 
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+
+	_ "github.com/lib/pq"
+)
 
 var DB *sql.DB
 
@@ -16,4 +24,18 @@ func ConnectDB() {
 	}
 
 	fmt.Println("Successfully connected to database")
+}
+
+func CreateTables() {
+	const createTablesSQL = `
+	CREATE TABLE IF NOT EXISTS cart_items (
+		item_id INT PRIMARY KEY,
+		item_name TEXT NOT NULL,
+		price FLOAT NOT NULL,
+		quantity INT NOT NULL
+	);
+	`
+	if _, err := DB.Exec(createTablesSQL); err != nil {
+		log.Fatal("Failed to create tables:", err)
+	}
 }

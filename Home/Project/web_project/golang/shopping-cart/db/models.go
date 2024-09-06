@@ -4,25 +4,9 @@
 
 package db
 
-import (
-	"database/sql"
-)
-
-type CartDiscount struct {
-	DiscountID int32
-	Percentage sql.NullString
-	FlatRate   sql.NullString
-}
-
 type CartItem struct {
-	ItemID    int32
-	ProductID sql.NullInt32
-	Quantity  int32
-}
-
-type Product struct {
-	ProductID int32
-	Name      string
-	Price     string
-	Stock     int32
+	ItemID   int32
+	ItemName string
+	Price    float64
+	Quantity int32
 }

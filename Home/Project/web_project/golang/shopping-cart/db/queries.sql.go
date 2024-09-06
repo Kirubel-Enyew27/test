@@ -7,149 +7,38 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
-const addCartItem = `-- name: AddCartItem :one
-INSERT INTO cart_items (product_id, quantity) 
-VALUES ($1, $2)
-RETURNING item_id
+const addCartItem = `-- name: AddCartItem :exec
+INSERT INTO cart_items (item_id, item_name, price, quantity) 
+VALUES ($1, $2, $3, $4)
 `
 
 type AddCartItemParams struct {
-	ProductID sql.NullInt32
-	Quantity  int32
-}
-
-func (q *Queries) AddCartItem(ctx context.Context, arg AddCartItemParams) (int32, error) {
-	row := q.db.QueryRowContext(ctx, addCartItem, arg.ProductID, arg.Quantity)
-	var item_id int32
-	err := row.Scan(&item_id)
-	return item_id, err
-}
-
-const clearCart = `-- name: ClearCart :exec
-DELETE FROM cart_items
-`
-
-func (q *Queries) ClearCart(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, clearCart)
-	return err
-}
-
-const createDiscount = `-- name: CreateDiscount :one
-INSERT INTO cart_discounts (percentage, flat_rate) 
-VALUES ($1, $2)
-RETURNING discount_id
-`
-
-type CreateDiscountParams struct {
-	Percentage sql.NullString
-	FlatRate   sql.NullString
-}
-
-func (q *Queries) CreateDiscount(ctx context.Context, arg CreateDiscountParams) (int32, error) {
-	row := q.db.QueryRowContext(ctx, createDiscount, arg.Percentage, arg.FlatRate)
-	var discount_id int32
-	err := row.Scan(&discount_id)
-	return discount_id, err
-}
-
-const createProduct = `-- name: CreateProduct :one
-INSERT INTO products (name, price, stock) 
-VALUES ($1, $2, $3)
-RETURNING product_id
-`
-
-type CreateProductParams struct {
-	Name  string
-	Price string
-	Stock int32
-}
-
-func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (int32, error) {
-	row := q.db.QueryRowContext(ctx, createProduct, arg.Name, arg.Price, arg.Stock)
-	var product_id int32
-	err := row.Scan(&product_id)
-	return product_id, err
-}
-
-const getCartItems = `-- name: GetCartItems :many
-SELECT ci.item_id, p.name, p.price, ci.quantity
-FROM cart_items ci
-JOIN products p ON ci.product_id = p.product_id
-`
-
-type GetCartItemsRow struct {
 	ItemID   int32
-	Name     string
-	Price    string
+	ItemName string
+	Price    float64
 	Quantity int32
 }
 
-func (q *Queries) GetCartItems(ctx context.Context) ([]GetCartItemsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getCartItems)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetCartItemsRow
-	for rows.Next() {
-		var i GetCartItemsRow
-		if err := rows.Scan(
-			&i.ItemID,
-			&i.Name,
-			&i.Price,
-			&i.Quantity,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getCartTotal = `-- name: GetCartTotal :one
-SELECT SUM(p.price * ci.quantity) AS total
-FROM cart_items ci
-JOIN products p ON ci.product_id = p.product_id
-`
-
-func (q *Queries) GetCartTotal(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getCartTotal)
-	var total int64
-	err := row.Scan(&total)
-	return total, err
-}
-
-const removeCartItem = `-- name: RemoveCartItem :exec
-DELETE FROM cart_items 
-WHERE product_id = $1
-`
-
-func (q *Queries) RemoveCartItem(ctx context.Context, productID sql.NullInt32) error {
-	_, err := q.db.ExecContext(ctx, removeCartItem, productID)
+func (q *Queries) AddCartItem(ctx context.Context, arg AddCartItemParams) error {
+	_, err := q.db.ExecContext(ctx, addCartItem,
+		arg.ItemID,
+		arg.ItemName,
+		arg.Price,
+		arg.Quantity,
+	)
 	return err
 }
 
-const updateCartItemQuantity = `-- name: UpdateCartItemQuantity :exec
-UPDATE cart_items 
-SET quantity = $2 
-WHERE product_id = $1
+const countUniqueItemsInCart = `-- name: CountUniqueItemsInCart :one
+SELECT COUNT(DISTINCT item_id) AS unique_items
+FROM cart_items
 `
 
-type UpdateCartItemQuantityParams struct {
-	ProductID sql.NullInt32
-	Quantity  int32
-}
-
-func (q *Queries) UpdateCartItemQuantity(ctx context.Context, arg UpdateCartItemQuantityParams) error {
-	_, err := q.db.ExecContext(ctx, updateCartItemQuantity, arg.ProductID, arg.Quantity)
-	return err
+func (q *Queries) CountUniqueItemsInCart(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countUniqueItemsInCart)
+	var unique_items int64
+	err := row.Scan(&unique_items)
+	return unique_items, err
 }
