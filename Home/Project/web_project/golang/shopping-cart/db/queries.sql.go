@@ -58,6 +58,15 @@ func (q *Queries) FindItemInCart(ctx context.Context, itemID int32) (bool, error
 	return exists, err
 }
 
+const removeAllItem = `-- name: RemoveAllItem :exec
+DELETE FROM cart_items
+`
+
+func (q *Queries) RemoveAllItem(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, removeAllItem)
+	return err
+}
+
 const removeItem = `-- name: RemoveItem :exec
 DELETE FROM cart_items WHERE item_id = $1
 `

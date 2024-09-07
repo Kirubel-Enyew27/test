@@ -9,6 +9,9 @@ FROM cart_items;
 -- name: RemoveItem :exec
 DELETE FROM cart_items WHERE item_id = $1;
 
+-- name: RemoveAllItem :exec
+DELETE FROM cart_items;
+
 -- name: FindItemInCart :one
 SELECT EXISTS (
     SELECT 1

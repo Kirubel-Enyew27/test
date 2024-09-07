@@ -7,8 +7,9 @@ import (
 )
 
 type CartRepoInterface interface {
-	AddCartItem(ctx context.Context, itemID int32, ItemName string, Price float64, quantity int32) error
+	AddCartItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) (int, error)
 	RemoveItem(ctx context.Context, itemID int) error
+	RemoveAllItem(ctx context.Context) error
 	FindItem(ctx context.Context, itemID int) (bool, error)
 }
 
@@ -22,14 +23,15 @@ func NewCartRepo(dbQueries *db.Queries) *CartRepo {
 	}
 }
 
-func (r *CartRepo) AddCartItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) error {
+func (r *CartRepo) AddCartItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) (int, error) {
 	count, err := r.dbQueries.CountUniqueItemsInCart(ctx)
 	if err != nil {
-		return err
+		return int(count), err
 	}
 
 	if count >= 10 {
-		return errors.New("cannot add more than 10 unique items to the cart")
+		return int(count), errors.New("cannot add more than 10 unique items to the cart")
+
 	}
 
 	params := db.AddCartItemParams{
@@ -41,14 +43,22 @@ func (r *CartRepo) AddCartItem(ctx context.Context, itemID int32, itemName strin
 
 	err = r.dbQueries.AddCartItem(ctx, params)
 	if err != nil {
-		return err
+		return int(count), err
 	}
 
-	return nil
+	return int(count + 1), nil
 }
 
 func (r *CartRepo) RemoveItem(ctx context.Context, itemID int) error {
 	err := r.dbQueries.RemoveItem(ctx, int32(itemID))
+	if err != nil {
+		return errors.New("failed to remove item from the cart")
+	}
+	return nil
+}
+
+func (r *CartRepo) RemoveAllItem(ctx context.Context) error {
+	err := r.dbQueries.RemoveAllItem(ctx)
 	if err != nil {
 		return errors.New("failed to remove item from the cart")
 	}
