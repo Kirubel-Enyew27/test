@@ -30,13 +30,12 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 		return
 	}
 
-	err := h.service.AddItem(context.Background(), req.ItemID, req.ItemName, req.Price, req.Quantity)
+	items, err := h.service.AddItem(context.Background(), req.ItemID, req.ItemName, req.Price, req.Quantity)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Item added to cart"})
+	c.JSON(http.StatusOK, gin.H{"message": "Item added to cart", "total unique items added": items})
 }
 
 func (h *CartHandler) RemoveItem(c *gin.Context) {

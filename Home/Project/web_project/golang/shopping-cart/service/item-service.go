@@ -7,7 +7,7 @@ import (
 )
 
 type CartServiceInterface interface {
-	AddItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) error
+	AddItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) (int, error)
 	RemoveItem(ctx context.Context, itemID int) error
 }
 
@@ -19,17 +19,17 @@ func NewCartService(repo data.CartRepoInterface) *CartService {
 	return &CartService{repo: repo}
 }
 
-func (s *CartService) AddItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) error {
+func (s *CartService) AddItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) (int, error) {
 	if quantity <= 0 {
-		return errors.New("quantity must be greater than zero")
+		return 0, errors.New("quantity must be greater than zero")
 	}
 
-	err := s.repo.AddCartItem(ctx, itemID, itemName, price, quantity)
+	items, err := s.repo.AddCartItem(ctx, itemID, itemName, price, quantity)
 	if err != nil {
-		return err
+		return items, err
 	}
 
-	return nil
+	return items, nil
 }
 
 func (s *CartService) RemoveItem(ctx context.Context, itemID int) error {
