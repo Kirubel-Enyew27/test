@@ -12,6 +12,7 @@ type CartRepoInterface interface {
 	RemoveAllItem(ctx context.Context) error
 	FindItem(ctx context.Context, itemID int) (bool, error)
 	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
+	ApplyDiscount(ctx context.Context, discount float64) error
 }
 
 type CartRepo struct {
@@ -83,6 +84,14 @@ func (r *CartRepo) UpdateItemQuantity(ctx context.Context, itemID int32, quantit
 	err := r.dbQueries.UpdateItemQuantity(ctx, params)
 	if err != nil {
 		return errors.New("failed to update item quantity")
+	}
+	return nil
+}
+
+func (r *CartRepo) ApplyDiscount(ctx context.Context, discount float64) error {
+	err := r.dbQueries.ApplyDiscountToCart(ctx, discount)
+	if err != nil {
+		return errors.New("failed to apply discount to the cart")
 	}
 	return nil
 }

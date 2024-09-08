@@ -31,6 +31,17 @@ func (q *Queries) AddCartItem(ctx context.Context, arg AddCartItemParams) error 
 	return err
 }
 
+const applyDiscountToCart = `-- name: ApplyDiscountToCart :exec
+UPDATE cart_items
+SET price = price - (price * $1 / 100)
+WHERE price > 0
+`
+
+func (q *Queries) ApplyDiscountToCart(ctx context.Context, price float64) error {
+	_, err := q.db.ExecContext(ctx, applyDiscountToCart, price)
+	return err
+}
+
 const countUniqueItemsInCart = `-- name: CountUniqueItemsInCart :one
 SELECT COUNT(DISTINCT item_id) AS unique_items
 FROM cart_items

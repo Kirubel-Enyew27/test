@@ -24,5 +24,9 @@ UPDATE cart_items
 SET quantity = $2
 WHERE item_id = $1;
 
+-- name: ApplyDiscountToCart :exec
+UPDATE cart_items
+SET price = price - (price * $1 / 100)
+WHERE price > 0;
 
 

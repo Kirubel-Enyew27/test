@@ -72,3 +72,21 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Item quantity updated"})
 }
+
+func (h *CartHandler) ApplyDiscount(c *gin.Context) {
+	var req struct {
+		Discount float64 `json:"discount"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	err := h.service.ApplyDiscount(context.Background(), req.Discount)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Discount applied"})
+}

@@ -10,6 +10,7 @@ type CartServiceInterface interface {
 	AddItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) (int, error)
 	RemoveItem(ctx context.Context, itemID int) error
 	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
+	ApplyDiscount(ctx context.Context, discount float64) error
 }
 
 type CartService struct {
@@ -56,4 +57,11 @@ func (s *CartService) UpdateItemQuantity(ctx context.Context, itemID int32, quan
 		return errors.New("quantity must be greater than zero")
 	}
 	return s.repo.UpdateItemQuantity(ctx, itemID, quantity)
+}
+
+func (s *CartService) ApplyDiscount(ctx context.Context, discount float64) error {
+	if discount <= 0 || discount > 100 {
+		return errors.New("invalid discount value")
+	}
+	return s.repo.ApplyDiscount(ctx, discount)
 }
