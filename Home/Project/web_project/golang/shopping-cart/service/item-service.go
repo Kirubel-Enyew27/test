@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"shopping-cart/data"
+	"shopping-cart/db"
 )
 
 type CartServiceInterface interface {
@@ -11,6 +12,7 @@ type CartServiceInterface interface {
 	RemoveItem(ctx context.Context, itemID int) error
 	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
 	ApplyDiscount(ctx context.Context, discount float64) error
+	ViewCart(ctx context.Context) ([]db.CartItem, error)
 }
 
 type CartService struct {
@@ -64,4 +66,8 @@ func (s *CartService) ApplyDiscount(ctx context.Context, discount float64) error
 		return errors.New("invalid discount value")
 	}
 	return s.repo.ApplyDiscount(ctx, discount)
+}
+
+func (s *CartService) ViewCart(ctx context.Context) ([]db.CartItem, error) {
+	return s.repo.ViewCart(ctx)
 }

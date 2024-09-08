@@ -90,3 +90,12 @@ func (h *CartHandler) ApplyDiscount(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Discount applied"})
 }
+
+func (h *CartHandler) ViewCart(c *gin.Context) {
+	items, err := h.service.ViewCart(context.Background())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"cart": items})
+}

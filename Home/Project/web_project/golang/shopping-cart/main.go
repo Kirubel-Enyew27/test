@@ -28,7 +28,7 @@ func main() {
 	router.DELETE("/cart/remove/:itemID", cartHandler.RemoveItem)
 	router.PUT("/cart/update", cartHandler.UpdateItemQuantity)
 	router.POST("/cart/discount", cartHandler.ApplyDiscount)
-	// router.GET("/cart", handler.ViewCart)
+	router.GET("/cart", cartHandler.ViewCart)
 	// router.POST("/cart/checkout", handler.Checkout)
 
 	router.Run(":8080")

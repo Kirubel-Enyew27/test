@@ -29,4 +29,7 @@ UPDATE cart_items
 SET price = price - (price * $1 / 100)
 WHERE price > 0;
 
+-- name: ViewCart :many
+SELECT item_id, item_name, price, quantity
+FROM cart_items;
 

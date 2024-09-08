@@ -102,3 +102,36 @@ func (q *Queries) UpdateItemQuantity(ctx context.Context, arg UpdateItemQuantity
 	_, err := q.db.ExecContext(ctx, updateItemQuantity, arg.ItemID, arg.Quantity)
 	return err
 }
+
+const viewCart = `-- name: ViewCart :many
+SELECT item_id, item_name, price, quantity
+FROM cart_items
+`
+
+func (q *Queries) ViewCart(ctx context.Context) ([]CartItem, error) {
+	rows, err := q.db.QueryContext(ctx, viewCart)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CartItem
+	for rows.Next() {
+		var i CartItem
+		if err := rows.Scan(
+			&i.ItemID,
+			&i.ItemName,
+			&i.Price,
+			&i.Quantity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
