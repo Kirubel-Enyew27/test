@@ -14,6 +14,7 @@ type CartRepoInterface interface {
 	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
 	ApplyDiscount(ctx context.Context, discount float64) error
 	ViewCart(ctx context.Context) ([]db.CartItem, error)
+	Checkout(ctx context.Context) error
 }
 
 type CartRepo struct {
@@ -103,4 +104,12 @@ func (r *CartRepo) ViewCart(ctx context.Context) ([]db.CartItem, error) {
 		return nil, errors.New("failed to retrieve cart items")
 	}
 	return items, nil
+}
+
+func (r *CartRepo) Checkout(ctx context.Context) error {
+	err := r.dbQueries.CheckoutCart(ctx)
+	if err != nil {
+		return errors.New("failed to checkout cart")
+	}
+	return nil
 }

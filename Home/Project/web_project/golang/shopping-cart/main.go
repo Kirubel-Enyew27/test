@@ -29,7 +29,7 @@ func main() {
 	router.PUT("/cart/update", cartHandler.UpdateItemQuantity)
 	router.POST("/cart/discount", cartHandler.ApplyDiscount)
 	router.GET("/cart", cartHandler.ViewCart)
-	// router.POST("/cart/checkout", handler.Checkout)
+	router.POST("/cart/checkout", cartHandler.Checkout)
 
 	router.Run(":8080")
 }

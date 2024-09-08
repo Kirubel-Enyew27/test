@@ -99,3 +99,12 @@ func (h *CartHandler) ViewCart(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"cart": items})
 }
+
+func (h *CartHandler) Checkout(c *gin.Context) {
+	err := h.service.Checkout(context.Background())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Checkout successful"})
+}

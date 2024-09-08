@@ -13,6 +13,7 @@ type CartServiceInterface interface {
 	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
 	ApplyDiscount(ctx context.Context, discount float64) error
 	ViewCart(ctx context.Context) ([]db.CartItem, error)
+	Checkout(ctx context.Context) error
 }
 
 type CartService struct {
@@ -70,4 +71,8 @@ func (s *CartService) ApplyDiscount(ctx context.Context, discount float64) error
 
 func (s *CartService) ViewCart(ctx context.Context) ([]db.CartItem, error) {
 	return s.repo.ViewCart(ctx)
+}
+
+func (s *CartService) Checkout(ctx context.Context) error {
+	return s.repo.Checkout(ctx)
 }

@@ -33,3 +33,5 @@ WHERE price > 0;
 SELECT item_id, item_name, price, quantity
 FROM cart_items;
 
+-- name: CheckoutCart :exec
+DELETE FROM cart_items;
