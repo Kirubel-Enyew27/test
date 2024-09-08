@@ -28,6 +28,14 @@ func ConnectDB() {
 
 func CreateTables() {
 	const createTablesSQL = `
+
+	CREATE TABLE IF NOT EXISTS products (
+		product_id INT PRIMARY KEY,
+		product_name TEXT NOT NULL,
+		price FLOAT NOT NULL,
+		stock INT NOT NULL
+	);
+
 	CREATE TABLE IF NOT EXISTS cart_items (
 		item_id INT PRIMARY KEY,
 		item_name TEXT NOT NULL,

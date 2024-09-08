@@ -7,7 +7,8 @@ import (
 )
 
 type CartRepoInterface interface {
-	AddCartItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) (int, error)
+	AddProduct(ctx context.Context, productID int32, productName string, price float64, stock int32) error
+	AddCartItem(ctx context.Context, productID int32, quantity int32) (int, error)
 	RemoveItem(ctx context.Context, itemID int) error
 	RemoveAllItem(ctx context.Context) error
 	FindItem(ctx context.Context, itemID int) (bool, error)
@@ -27,7 +28,36 @@ func NewCartRepo(dbQueries *db.Queries) *CartRepo {
 	}
 }
 
-func (r *CartRepo) AddCartItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) (int, error) {
+func (r *CartRepo) AddProduct(ctx context.Context, productID int32, productName string, price float64, stock int32) error {
+	params := db.AddProductParams{
+		ProductID:   productID,
+		ProductName: productName,
+		Price:       price,
+		Stock:       stock,
+	}
+
+	err := r.dbQueries.AddProduct(ctx, params)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *CartRepo) GetProduct(ctx context.Context, productID int32) (*db.Product, error) {
+	product, err := r.dbQueries.GetProductByID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+	return &product, nil
+}
+
+func (r *CartRepo) AddCartItem(ctx context.Context, productID int32, quantity int32) (int, error) {
+
+	product, err := r.dbQueries.GetProductByID(ctx, productID)
+	if err != nil {
+		return 0, errors.New("product does not exist")
+	}
+
 	count, err := r.dbQueries.CountUniqueItemsInCart(ctx)
 	if err != nil {
 		return int(count), err
@@ -38,16 +68,31 @@ func (r *CartRepo) AddCartItem(ctx context.Context, itemID int32, itemName strin
 
 	}
 
+	if quantity > product.Stock {
+		return int(count), errors.New("quantity exceeds available stock")
+	}
+
 	params := db.AddCartItemParams{
-		ItemID:   itemID,
-		ItemName: itemName,
-		Price:    price,
+		ItemID:   product.ProductID,
+		ItemName: product.ProductName,
+		Price:    product.Price,
 		Quantity: quantity,
 	}
 
 	err = r.dbQueries.AddCartItem(ctx, params)
 	if err != nil {
 		return int(count), err
+	}
+
+	stock := product.Stock - quantity
+	productParams := db.UpdateProductStockParams{
+		ProductID: productID,
+		Stock:     stock,
+	}
+
+	err = r.dbQueries.UpdateProductStock(ctx, productParams)
+	if err != nil {
+		return int(count + 1), err
 	}
 
 	return int(count + 1), nil

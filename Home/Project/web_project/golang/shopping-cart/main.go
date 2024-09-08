@@ -24,6 +24,7 @@ func main() {
 
 	router := gin.Default()
 
+	router.POST("/products/add", cartHandler.AddProduct)
 	router.POST("/cart/add", cartHandler.AddItem)
 	router.DELETE("/cart/remove/:itemID", cartHandler.RemoveItem)
 	router.PUT("/cart/update", cartHandler.UpdateItemQuantity)

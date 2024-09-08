@@ -17,12 +17,12 @@ func NewCartHandler(service service.CartServiceInterface) *CartHandler {
 	return &CartHandler{service: service}
 }
 
-func (h *CartHandler) AddItem(c *gin.Context) {
+func (h *CartHandler) AddProduct(c *gin.Context) {
 	var req struct {
-		ItemID   int32   `json:"item_id"`
-		ItemName string  `json:"item_name"`
-		Price    float64 `json:"price"`
-		Quantity int32   `json:"quantity"`
+		ProductID   int32   `json:"product_id"`
+		ProductName string  `json:"product_name"`
+		Price       float64 `json:"price"`
+		Stock       int32   `json:"stock"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -30,7 +30,27 @@ func (h *CartHandler) AddItem(c *gin.Context) {
 		return
 	}
 
-	items, err := h.service.AddItem(context.Background(), req.ItemID, req.ItemName, req.Price, req.Quantity)
+	err := h.service.AddProduct(context.Background(), req.ProductID, req.ProductName, req.Price, req.Stock)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Product added successfully"})
+}
+
+func (h *CartHandler) AddItem(c *gin.Context) {
+	var req struct {
+		ProductID int32 `json:"product_id"`
+		Quantity  int32 `json:"quantity"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	items, err := h.service.AddItem(context.Background(), req.ProductID, req.Quantity)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

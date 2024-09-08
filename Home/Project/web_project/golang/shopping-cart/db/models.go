@@ -10,3 +10,10 @@ type CartItem struct {
 	Price    float64
 	Quantity int32
 }
+
+type Product struct {
+	ProductID   int32
+	ProductName string
+	Price       float64
+	Stock       int32
+}

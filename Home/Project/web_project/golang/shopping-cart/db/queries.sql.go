@@ -31,6 +31,28 @@ func (q *Queries) AddCartItem(ctx context.Context, arg AddCartItemParams) error 
 	return err
 }
 
+const addProduct = `-- name: AddProduct :exec
+INSERT INTO products (product_id, product_name, price, stock)
+VALUES ($1, $2, $3, $4)
+`
+
+type AddProductParams struct {
+	ProductID   int32
+	ProductName string
+	Price       float64
+	Stock       int32
+}
+
+func (q *Queries) AddProduct(ctx context.Context, arg AddProductParams) error {
+	_, err := q.db.ExecContext(ctx, addProduct,
+		arg.ProductID,
+		arg.ProductName,
+		arg.Price,
+		arg.Stock,
+	)
+	return err
+}
+
 const applyDiscountToCart = `-- name: ApplyDiscountToCart :exec
 UPDATE cart_items
 SET price = price - (price * $1 / 100)
@@ -78,6 +100,24 @@ func (q *Queries) FindItemInCart(ctx context.Context, itemID int32) (bool, error
 	return exists, err
 }
 
+const getProductByID = `-- name: GetProductByID :one
+SELECT product_id, product_name, price, stock
+FROM products
+WHERE product_id = $1
+`
+
+func (q *Queries) GetProductByID(ctx context.Context, productID int32) (Product, error) {
+	row := q.db.QueryRowContext(ctx, getProductByID, productID)
+	var i Product
+	err := row.Scan(
+		&i.ProductID,
+		&i.ProductName,
+		&i.Price,
+		&i.Stock,
+	)
+	return i, err
+}
+
 const removeAllItem = `-- name: RemoveAllItem :exec
 DELETE FROM cart_items
 `
@@ -109,6 +149,22 @@ type UpdateItemQuantityParams struct {
 
 func (q *Queries) UpdateItemQuantity(ctx context.Context, arg UpdateItemQuantityParams) error {
 	_, err := q.db.ExecContext(ctx, updateItemQuantity, arg.ItemID, arg.Quantity)
+	return err
+}
+
+const updateProductStock = `-- name: UpdateProductStock :exec
+UPDATE products
+SET stock = $2
+WHERE product_id = $1
+`
+
+type UpdateProductStockParams struct {
+	ProductID int32
+	Stock     int32
+}
+
+func (q *Queries) UpdateProductStock(ctx context.Context, arg UpdateProductStockParams) error {
+	_, err := q.db.ExecContext(ctx, updateProductStock, arg.ProductID, arg.Stock)
 	return err
 }
 

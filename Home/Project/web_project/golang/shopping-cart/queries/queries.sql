@@ -35,3 +35,17 @@ FROM cart_items;
 
 -- name: CheckoutCart :exec
 DELETE FROM cart_items;
+
+-- name: AddProduct :exec
+INSERT INTO products (product_id, product_name, price, stock)
+VALUES ($1, $2, $3, $4);
+
+-- name: GetProductByID :one
+SELECT product_id, product_name, price, stock
+FROM products
+WHERE product_id = $1;
+
+-- name: UpdateProductStock :exec
+UPDATE products
+SET stock = $2
+WHERE product_id = $1;

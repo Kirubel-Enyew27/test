@@ -8,7 +8,8 @@ import (
 )
 
 type CartServiceInterface interface {
-	AddItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) (int, error)
+	AddProduct(ctx context.Context, productID int32, productName string, price float64, stock int32) error
+	AddItem(ctx context.Context, productID int32, quantity int32) (int, error)
 	RemoveItem(ctx context.Context, itemID int) error
 	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
 	ApplyDiscount(ctx context.Context, discount float64) error
@@ -24,12 +25,23 @@ func NewCartService(repo data.CartRepoInterface) *CartService {
 	return &CartService{repo: repo}
 }
 
-func (s *CartService) AddItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) (int, error) {
+func (s *CartService) AddProduct(ctx context.Context, productID int32, productName string, price float64, stock int32) error {
+	if price <= 0 {
+		return errors.New("price must be greater than zero")
+	}
+	if productName == "" {
+		return errors.New("product name must not be empty")
+	}
+
+	return s.repo.AddProduct(ctx, productID, productName, price, stock)
+}
+
+func (s *CartService) AddItem(ctx context.Context, productID int32, quantity int32) (int, error) {
 	if quantity <= 0 {
 		return 0, errors.New("quantity must be greater than zero")
 	}
 
-	items, err := s.repo.AddCartItem(ctx, itemID, itemName, price, quantity)
+	items, err := s.repo.AddCartItem(ctx, productID, quantity)
 	if err != nil {
 		return items, err
 	}
