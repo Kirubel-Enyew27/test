@@ -39,7 +39,7 @@ func (s *CartSteps) cleanup() {
 
 func (s *CartSteps) AddAnItemWithIDNamePriceAndQuantity(itemID int, itemName string, price float64, quantity int) error {
 
-	req, _ := http.NewRequest(http.MethodPost, "/cart/add", strings.NewReader(fmt.Sprintf(`{"item_id":"%v","item_name":"%v","price":"%v" "quantity":"%v"}`, itemID, itemName, price, quantity)))
+	req, _ := http.NewRequest(http.MethodPost, "/cart/add", strings.NewReader(fmt.Sprintf(`{"item_id":"%v","item_name":"%v","price":"%v","quantity":"%v"}`, itemID, itemName, price, quantity)))
 	req.Header.Set("Content-Type", "application/json")
 
 	s.router.ServeHTTP(s.recorder, req)
