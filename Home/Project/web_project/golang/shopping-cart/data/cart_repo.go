@@ -11,6 +11,7 @@ type CartRepoInterface interface {
 	RemoveItem(ctx context.Context, itemID int) error
 	RemoveAllItem(ctx context.Context) error
 	FindItem(ctx context.Context, itemID int) (bool, error)
+	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
 }
 
 type CartRepo struct {
@@ -72,4 +73,16 @@ func (r *CartRepo) FindItem(ctx context.Context, itemID int) (bool, error) {
 	}
 
 	return exists, nil
+}
+
+func (r *CartRepo) UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error {
+	params := db.UpdateItemQuantityParams{
+		ItemID:   itemID,
+		Quantity: quantity,
+	}
+	err := r.dbQueries.UpdateItemQuantity(ctx, params)
+	if err != nil {
+		return errors.New("failed to update item quantity")
+	}
+	return nil
 }

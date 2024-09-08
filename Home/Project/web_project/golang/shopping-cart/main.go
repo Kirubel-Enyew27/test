@@ -26,7 +26,7 @@ func main() {
 
 	router.POST("/cart/add", cartHandler.AddItem)
 	router.DELETE("/cart/remove/:itemID", cartHandler.RemoveItem)
-	// router.PUT("/cart/update", handler.UpdateItemQuantity)
+	router.PUT("/cart/update", cartHandler.UpdateItemQuantity)
 	// router.POST("/cart/discount", handler.ApplyDiscount)
 	// router.GET("/cart", handler.ViewCart)
 	// router.POST("/cart/checkout", handler.Checkout)

@@ -9,6 +9,7 @@ import (
 type CartServiceInterface interface {
 	AddItem(ctx context.Context, itemID int32, itemName string, price float64, quantity int32) (int, error)
 	RemoveItem(ctx context.Context, itemID int) error
+	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
 }
 
 type CartService struct {
@@ -48,4 +49,11 @@ func (s *CartService) RemoveItem(ctx context.Context, itemID int) error {
 
 	return nil
 
+}
+
+func (s *CartService) UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error {
+	if quantity <= 0 {
+		return errors.New("quantity must be greater than zero")
+	}
+	return s.repo.UpdateItemQuantity(ctx, itemID, quantity)
 }

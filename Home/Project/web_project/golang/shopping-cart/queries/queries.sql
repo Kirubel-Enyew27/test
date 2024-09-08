@@ -19,5 +19,10 @@ SELECT EXISTS (
     WHERE item_id = $1
 );
 
+-- name: UpdateItemQuantity :exec
+UPDATE cart_items
+SET quantity = $2
+WHERE item_id = $1;
+
 
 
