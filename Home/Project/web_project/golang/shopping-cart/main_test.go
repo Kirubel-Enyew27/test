@@ -22,6 +22,7 @@ func TestMain(m *testing.M) {
 		ScenarioInitializer: func(ctx *godog.ScenarioContext) {
 			steps.InitializeAddItemScenario(ctx)
 			steps.InitializeRemoveItemScenario(ctx)
+			steps.InitializeUpdateItemScenario(ctx)
 		},
 		Options: &opts,
 	}.Run()

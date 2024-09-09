@@ -7,8 +7,8 @@ Feature: Remove items from the shopping cart
     Then the product "<product_id>" should no longer be in the cart
 
     Examples:
-      | product_id | product_name | price | stock | quantity | unique_items |
-      | 1          | Laptop       | 1000  | 5     | 1        | 1            |
-      | 2          | Phone        | 500   | 10    | 2        | 2            |
-      | 3          | Desktop      | 1000  | 4     | 1        | 3            |
-      | 4          | Headphones   | 50    | 15    | 10       | 4            |
+      | product_id | product_name | price | stock | quantity |
+      | 1          | Laptop       | 1000  | 5     | 1        | 
+      | 2          | Phone        | 500   | 10    | 2        | 
+      | 3          | Desktop      | 1000  | 4     | 1        | 
+      | 4          | Headphones   | 50    | 15    | 10       | 
