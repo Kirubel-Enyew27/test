@@ -49,3 +49,6 @@ WHERE product_id = $1;
 UPDATE products
 SET stock = $2
 WHERE product_id = $1;
+
+-- name: RemoveAllProduct :exec
+DELETE FROM products;

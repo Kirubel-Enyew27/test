@@ -114,6 +114,14 @@ func (r *CartRepo) RemoveAllItem(ctx context.Context) error {
 	return nil
 }
 
+func (r *CartRepo) RemoveAllProduct(ctx context.Context) error {
+	err := r.dbQueries.RemoveAllProduct(ctx)
+	if err != nil {
+		return errors.New("failed to remove product")
+	}
+	return nil
+}
+
 func (r *CartRepo) FindItem(ctx context.Context, itemID int) (bool, error) {
 	exists, err := r.dbQueries.FindItemInCart(ctx, int32(itemID))
 	if err != nil {

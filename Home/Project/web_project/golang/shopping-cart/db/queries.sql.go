@@ -127,6 +127,15 @@ func (q *Queries) RemoveAllItem(ctx context.Context) error {
 	return err
 }
 
+const removeAllProduct = `-- name: RemoveAllProduct :exec
+DELETE FROM products
+`
+
+func (q *Queries) RemoveAllProduct(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, removeAllProduct)
+	return err
+}
+
 const removeItem = `-- name: RemoveItem :exec
 DELETE FROM cart_items WHERE item_id = $1
 `
