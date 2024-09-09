@@ -1,12 +1,7 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"os"
-	"shopping-cart/config"
-	"shopping-cart/data"
-	"shopping-cart/db"
 	"shopping-cart/steps"
 	"testing"
 
@@ -14,17 +9,7 @@ import (
 )
 
 func init() {
-	cartRepo := data.NewCartRepo(db.New(config.DB))
-
-	err := cartRepo.RemoveAllProduct(context.Background())
-	if err != nil {
-		fmt.Printf("failed to clean up products, %v", err)
-	}
-
-	err = cartRepo.RemoveAllItem(context.Background())
-	if err != nil {
-		fmt.Printf("failed to clean up cart items, %v", err)
-	}
+	steps.ClearDB()
 }
 
 func TestMain(m *testing.M) {
@@ -33,9 +18,12 @@ func TestMain(m *testing.M) {
 	}
 
 	status := godog.TestSuite{
-		Name:                "Shopping Cart",
-		ScenarioInitializer: steps.InitializeScenario,
-		Options:             &opts,
+		Name: "Shopping Cart",
+		ScenarioInitializer: func(ctx *godog.ScenarioContext) {
+			steps.InitializeAddItemScenario(ctx)
+			steps.InitializeRemoveItemScenario(ctx)
+		},
+		Options: &opts,
 	}.Run()
 
 	if st := m.Run(); st > status {

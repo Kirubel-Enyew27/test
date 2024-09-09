@@ -8,28 +8,12 @@ import (
 	"net/http/httptest"
 	"strconv"
 
-	"shopping-cart/config"
-	"shopping-cart/data"
-	"shopping-cart/db"
-	"shopping-cart/handler"
-	"shopping-cart/service"
-
 	"github.com/cucumber/godog"
 	"github.com/gin-gonic/gin"
 )
 
-var cartHandler *handler.CartHandler
-var lastResponse *httptest.ResponseRecorder
-
-func SetupScenario() {
-	cartRepo := data.NewCartRepo(db.New(config.DB))
-	cartService := service.NewCartService(cartRepo)
-	cartHandler = handler.NewCartHandler(cartService)
-
-	gin.SetMode(gin.TestMode)
-}
-
-func aProductWithIDNamePriceAndStockIsAvailable(productID, productName, price, stock string) error {
+func iHaveAddeAProductWithIDNamePriceAndStockIsAvailable(productID, productName, price, stock string) error {
+	ClearDB()
 	productIDInt, err := strconv.Atoi(productID)
 	if err != nil {
 		return err
@@ -79,7 +63,7 @@ func aProductWithIDNamePriceAndStockIsAvailable(productID, productName, price, s
 	return nil
 }
 
-func iAddOfProductToTheCart(quantity, productID string) error {
+func iHaveAddedOfProductToTheCart(quantity, productID string) error {
 	productIDInt, err := strconv.Atoi(productID)
 	if err != nil {
 		return err
@@ -122,34 +106,70 @@ func iAddOfProductToTheCart(quantity, productID string) error {
 	return nil
 }
 
-func theTotalUniqueItemsInTheCartShouldBe(expectedUniqueItems string) error {
-	expected, err := strconv.Atoi(expectedUniqueItems)
+func iRemoveProductFromTheCart(productID string) error {
+	productIDInt, err := strconv.Atoi(productID)
 	if err != nil {
 		return err
 	}
 
-	var responseBody map[string]interface{}
-	if err := json.Unmarshal(lastResponse.Body.Bytes(), &responseBody); err != nil {
-		return err
+	req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/remove-item/%d", productIDInt), nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	recorder := httptest.NewRecorder()
+
+	c, _ := gin.CreateTestContext(recorder)
+	c.Request = req
+
+	c.Params = gin.Params{
+		{Key: "itemID", Value: productID},
 	}
 
-	uniqueItems, ok := responseBody["total unique items added"].(float64)
-	if !ok {
-		return fmt.Errorf("could not find 'total unique items added' in response")
-	}
+	cartHandler.RemoveItem(c)
 
-	if int(uniqueItems) != expected {
-		return fmt.Errorf("expected %d unique items, but got %d", expected, int(uniqueItems))
+	lastResponse = recorder
+
+	if recorder.Code != http.StatusOK {
+		return fmt.Errorf("expected status code 200 but got %d: %s", recorder.Code, recorder.Body.String())
 	}
 
 	return nil
 }
 
-func InitializeAddItemScenario(ctx *godog.ScenarioContext) {
-	SetupScenario()
+func theProductShouldNoLongerBeInTheCart(productID string) error {
+	productIDInt, err := strconv.Atoi(productID)
+	if err != nil {
+		return err
+	}
 
-	ctx.Step(`^a product with ID "([^"]*)", name "([^"]*)", price "([^"]*)", and stock "([^"]*)" is available$`, aProductWithIDNamePriceAndStockIsAvailable)
-	ctx.Step(`^I add "([^"]*)" of product "([^"]*)" to the cart$`, iAddOfProductToTheCart)
-	ctx.Step(`^the total unique items in the cart should be "([^"]*)"$`, theTotalUniqueItemsInTheCartShouldBe)
+	req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/remove-item/%d", productIDInt), nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	recorder := httptest.NewRecorder()
+
+	c, _ := gin.CreateTestContext(recorder)
+	c.Request = req
+
+	c.Params = gin.Params{
+		{Key: "itemID", Value: productID},
+	}
+
+	cartHandler.RemoveItem(c)
+
+	lastResponse = recorder
+
+	if recorder.Code != http.StatusInternalServerError {
+		return fmt.Errorf("expected status code 500 but got %d: %s", recorder.Code, recorder.Body.String())
+	}
+
+	ClearDB()
+	return nil
+}
+
+func InitializeRemoveItemScenario(ctx *godog.ScenarioContext) {
+	SetupScenario()
+	ctx.Step(`^I have added a product with ID "([^"]*)", name "([^"]*)", price "([^"]*)", and stock "([^"]*)" is available$`, iHaveAddeAProductWithIDNamePriceAndStockIsAvailable)
+	ctx.Step(`^I have added "([^"]*)" of product "([^"]*)" to the cart$`, iHaveAddedOfProductToTheCart)
+	ctx.Step(`^I remove product "([^"]*)" from the cart$`, iRemoveProductFromTheCart)
+	ctx.Step(`^the product "([^"]*)" should no longer be in the cart$`, theProductShouldNoLongerBeInTheCart)
 
 }
