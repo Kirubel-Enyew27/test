@@ -16,8 +16,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func iUpdateOfProductTo(productID, newQuantity string) error {
-	productIDInt, err := strconv.Atoi(productID)
+func iUpdateOfProductTo(itemID, newQuantity string) error {
+	itemIDInt, err := strconv.Atoi(itemID)
 	if err != nil {
 		return err
 	}
@@ -28,11 +28,11 @@ func iUpdateOfProductTo(productID, newQuantity string) error {
 	}
 
 	reqBody := struct {
-		ProductID int32 `json:"product_id"`
-		Quantity  int32 `json:"quantity"`
+		ItemID   int32 `json:"item_id"`
+		Quantity int32 `json:"quantity"`
 	}{
-		ProductID: int32(productIDInt),
-		Quantity:  int32(quantityInt),
+		ItemID:   int32(itemIDInt),
+		Quantity: int32(quantityInt),
 	}
 
 	reqBodyBytes, err := json.Marshal(reqBody)
