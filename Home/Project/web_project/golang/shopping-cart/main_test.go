@@ -23,6 +23,7 @@ func TestMain(m *testing.M) {
 			steps.InitializeAddItemScenario(ctx)
 			steps.InitializeRemoveItemScenario(ctx)
 			steps.InitializeUpdateItemScenario(ctx)
+			steps.InitializeApplyDiscountScenario(ctx)
 		},
 		Options: &opts,
 	}.Run()
