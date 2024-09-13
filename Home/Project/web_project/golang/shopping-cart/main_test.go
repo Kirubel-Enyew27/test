@@ -24,6 +24,7 @@ func TestMain(m *testing.M) {
 			steps.InitializeRemoveItemScenario(ctx)
 			steps.InitializeUpdateItemScenario(ctx)
 			steps.InitializeApplyDiscountScenario(ctx)
+			steps.InitializeViewItemsScenario(ctx)
 		},
 		Options: &opts,
 	}.Run()
