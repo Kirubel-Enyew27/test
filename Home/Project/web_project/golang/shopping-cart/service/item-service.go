@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"shopping-cart/data"
 	"shopping-cart/db"
 )
@@ -86,5 +87,12 @@ func (s *CartService) ViewCart(ctx context.Context) ([]db.CartItem, error) {
 }
 
 func (s *CartService) Checkout(ctx context.Context) error {
+	items, err := s.repo.ViewCart(ctx)
+	if err != nil {
+		return err
+	}
+	if len(items) == 0 {
+		return fmt.Errorf("cart is empty")
+	}
 	return s.repo.Checkout(ctx)
 }
