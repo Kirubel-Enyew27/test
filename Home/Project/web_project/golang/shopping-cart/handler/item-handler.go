@@ -123,6 +123,10 @@ func (h *CartHandler) ViewCart(c *gin.Context) {
 func (h *CartHandler) Checkout(c *gin.Context) {
 	err := h.service.Checkout(context.Background())
 	if err != nil {
+		if err.Error() == "cart is empty" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
