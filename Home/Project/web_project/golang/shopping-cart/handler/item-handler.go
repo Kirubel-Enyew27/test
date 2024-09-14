@@ -112,12 +112,12 @@ func (h *CartHandler) ApplyDiscount(c *gin.Context) {
 }
 
 func (h *CartHandler) ViewCart(c *gin.Context) {
-	items, err := h.service.ViewCart(context.Background())
+	items, totalPrice, err := h.service.ViewCart(context.Background())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"cart": items})
+	c.JSON(http.StatusOK, gin.H{"cart": items, "total price": totalPrice})
 }
 
 func (h *CartHandler) Checkout(c *gin.Context) {

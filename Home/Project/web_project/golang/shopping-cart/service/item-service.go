@@ -14,7 +14,7 @@ type CartServiceInterface interface {
 	RemoveItem(ctx context.Context, itemID int) error
 	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
 	ApplyDiscount(ctx context.Context, discount float64) error
-	ViewCart(ctx context.Context) ([]db.CartItem, error)
+	ViewCart(ctx context.Context) ([]db.CartItem, float64, error)
 	Checkout(ctx context.Context) error
 }
 
@@ -82,8 +82,15 @@ func (s *CartService) ApplyDiscount(ctx context.Context, discount float64) error
 	return s.repo.ApplyDiscount(ctx, discount)
 }
 
-func (s *CartService) ViewCart(ctx context.Context) ([]db.CartItem, error) {
-	return s.repo.ViewCart(ctx)
+func (s *CartService) ViewCart(ctx context.Context) ([]db.CartItem, float64, error) {
+	items, err := s.repo.ViewCart(ctx)
+	totlalPrice := 0.0
+
+	for _, item := range items {
+		totlalPrice += float64(item.Quantity) * item.Price
+	}
+
+	return items, totlalPrice, err
 }
 
 func (s *CartService) Checkout(ctx context.Context) error {
