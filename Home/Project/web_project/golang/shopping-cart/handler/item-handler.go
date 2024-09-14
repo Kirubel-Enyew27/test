@@ -95,7 +95,8 @@ func (h *CartHandler) UpdateItemQuantity(c *gin.Context) {
 
 func (h *CartHandler) ApplyDiscount(c *gin.Context) {
 	var req struct {
-		Discount float64 `json:"discount"`
+		Discount     float64              `json:"discount"`
+		DiscountType service.DiscountType `json:"discount_type"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -103,7 +104,7 @@ func (h *CartHandler) ApplyDiscount(c *gin.Context) {
 		return
 	}
 
-	err := h.service.ApplyDiscount(context.Background(), req.Discount)
+	err := h.service.ApplyDiscount(context.Background(), req.Discount, req.DiscountType)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -8,12 +8,19 @@ import (
 	"shopping-cart/db"
 )
 
+type DiscountType string
+
+const (
+	Percentage DiscountType = "percentage"
+	FlatRate   DiscountType = "flat_rate"
+)
+
 type CartServiceInterface interface {
 	AddProduct(ctx context.Context, productID int32, productName string, price float64, stock int32) error
 	AddItem(ctx context.Context, productID int32, quantity int32) (int, error)
 	RemoveItem(ctx context.Context, itemID int) error
 	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
-	ApplyDiscount(ctx context.Context, discount float64) error
+	ApplyDiscount(ctx context.Context, discount float64, discountType DiscountType) error
 	ViewCart(ctx context.Context) ([]db.CartItem, float64, error)
 	Checkout(ctx context.Context) error
 }
@@ -75,11 +82,28 @@ func (s *CartService) UpdateItemQuantity(ctx context.Context, itemID int32, quan
 	return s.repo.UpdateItemQuantity(ctx, itemID, quantity)
 }
 
-func (s *CartService) ApplyDiscount(ctx context.Context, discount float64) error {
-	if discount <= 0 || discount > 100 {
-		return errors.New("invalid discount value")
+func (s *CartService) ApplyDiscount(ctx context.Context, discount float64, discountType DiscountType) error {
+	if discountType == Percentage {
+		if discount <= 0 || discount > 100 {
+			return errors.New("percentage discount must be between 0 and 100")
+		}
+		err := s.repo.ApplyPercentageDiscountToCart(ctx, discount)
+		if err != nil {
+			return err
+		}
+	} else if discountType == FlatRate {
+		if discount < 0 {
+			return errors.New("flat rate discount must be non-negative")
+		}
+		err := s.repo.ApplyFlatRateDiscountToCart(ctx, discount)
+		if err != nil {
+			return err
+		}
+	} else {
+		return errors.New("invalid discount type")
 	}
-	return s.repo.ApplyDiscount(ctx, discount)
+
+	return nil
 }
 
 func (s *CartService) ViewCart(ctx context.Context) ([]db.CartItem, float64, error) {

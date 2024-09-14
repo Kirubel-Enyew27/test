@@ -53,14 +53,25 @@ func (q *Queries) AddProduct(ctx context.Context, arg AddProductParams) error {
 	return err
 }
 
-const applyDiscountToCart = `-- name: ApplyDiscountToCart :exec
+const applyFlatRateDiscountToCart = `-- name: ApplyFlatRateDiscountToCart :exec
 UPDATE cart_items
-SET price = price - (price * $1 / 100)
+SET price = GREATEST(price - $1, 0) 
 WHERE price > 0
 `
 
-func (q *Queries) ApplyDiscountToCart(ctx context.Context, price float64) error {
-	_, err := q.db.ExecContext(ctx, applyDiscountToCart, price)
+func (q *Queries) ApplyFlatRateDiscountToCart(ctx context.Context, price float64) error {
+	_, err := q.db.ExecContext(ctx, applyFlatRateDiscountToCart, price)
+	return err
+}
+
+const applyPercentageDiscountToCart = `-- name: ApplyPercentageDiscountToCart :exec
+UPDATE cart_items
+SET price = GREATEST(price - (price * $1 / 100), 0)
+WHERE price > 0
+`
+
+func (q *Queries) ApplyPercentageDiscountToCart(ctx context.Context, price float64) error {
+	_, err := q.db.ExecContext(ctx, applyPercentageDiscountToCart, price)
 	return err
 }
 

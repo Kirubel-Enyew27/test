@@ -13,7 +13,8 @@ type CartRepoInterface interface {
 	RemoveAllItem(ctx context.Context) error
 	FindItem(ctx context.Context, itemID int) (bool, error)
 	UpdateItemQuantity(ctx context.Context, itemID int32, quantity int32) error
-	ApplyDiscount(ctx context.Context, discount float64) error
+	ApplyPercentageDiscountToCart(ctx context.Context, discount float64) error
+	ApplyFlatRateDiscountToCart(ctx context.Context, discount float64) error
 	ViewCart(ctx context.Context) ([]db.CartItem, error)
 	Checkout(ctx context.Context) error
 }
@@ -143,10 +144,18 @@ func (r *CartRepo) UpdateItemQuantity(ctx context.Context, itemID int32, quantit
 	return nil
 }
 
-func (r *CartRepo) ApplyDiscount(ctx context.Context, discount float64) error {
-	err := r.dbQueries.ApplyDiscountToCart(ctx, discount)
+func (r *CartRepo) ApplyPercentageDiscountToCart(ctx context.Context, discount float64) error {
+	err := r.dbQueries.ApplyPercentageDiscountToCart(ctx, discount)
 	if err != nil {
-		return errors.New("failed to apply discount to the cart")
+		return errors.New("failed to apply percentage discount to the cart")
+	}
+	return nil
+}
+
+func (r *CartRepo) ApplyFlatRateDiscountToCart(ctx context.Context, discount float64) error {
+	err := r.dbQueries.ApplyFlatRateDiscountToCart(ctx, discount)
+	if err != nil {
+		return errors.New("failed to apply flat rate discount to the cart")
 	}
 	return nil
 }
