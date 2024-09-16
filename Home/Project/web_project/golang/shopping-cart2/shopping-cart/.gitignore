@@ -1,0 +1,31 @@
+.env
+# Ignore swap files
+*.swp
+*.swo
+*.swn
+
+# Ignore configuration and personal directories
+.android/
+.atom/
+.bash_history
+.cache/
+.config/
+.docker/
+.dotnet/
+.gradle/
+.idea/
+.npm/
+.nuget/
+.vscode/
+.ssh/
+.zoom/
+
+# Ignore any hidden directories in the home path
+../../../../../.*/ 
+
+# Ignore other personal or project-specific directories
+../../Downloads/
+../../Pictures/
+../../Videos/
+../../Desktop/
+../../Documents/
