@@ -10,16 +10,19 @@ import (
 	"shopping-cart/config"
 	"shopping-cart/data"
 	"shopping-cart/db"
+	"shopping-cart/service"
 
 	"github.com/cucumber/godog"
 	"github.com/gin-gonic/gin"
 )
 
-func iApplyADiscountOfToTheCart(discount_value float64) error {
+func iApplyADiscountOfToTheCart(discount_value float64, discount_type string) error {
 	reqBody := struct {
-		Discount float64 `json:"discount"`
+		Discount     float64              `json:"discount"`
+		DiscountType service.DiscountType `json:"discount_type"`
 	}{
-		Discount: discount_value,
+		Discount:     discount_value,
+		DiscountType: service.DiscountType(discount_type),
 	}
 
 	reqBodyBytes, err := json.Marshal(reqBody)
@@ -66,6 +69,6 @@ func InitializeApplyDiscountScenario(ctx *godog.ScenarioContext) {
 	SetupScenario()
 	ctx.Step(`^I have added a product with ID "([^"]*)", name "([^"]*)", price "([^"]*)", and stock "([^"]*)" is available$`, iHaveAddeAProductWithIDNamePriceAndStockIsAvailable)
 	ctx.Step(`^I have added "([^"]*)" of product "([^"]*)" to the cart$`, iHaveAddedOfProductToTheCart)
-	ctx.Step(`^I apply a discount of ([\d.]+)% to the cart$`, iApplyADiscountOfToTheCart)
+	ctx.Step(`^I apply a discount of ([\d.]+) with "([^"]*)" discount type to the cart$`, iApplyADiscountOfToTheCart)
 	ctx.Step(`^the expected price should be ([\d.]+)$`, theExpectedPriceShouldBe)
 }
