@@ -2,11 +2,13 @@ package steps
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"strings"
 
 	"shopping-cart/config"
 	"shopping-cart/data"
@@ -103,6 +105,12 @@ func iAddOfProductToTheCart(quantity, productID string) error {
 		return err
 	}
 
+	cartRepo := db.New(config.DB)
+	count, err := cartRepo.CountUniqueItemsInCart(context.Background())
+	if err != nil {
+		return err
+	}
+
 	req := httptest.NewRequest(http.MethodPost, "/add-item", bytes.NewReader(reqBodyBytes))
 	req.Header.Set("Content-Type", "application/json")
 
@@ -115,7 +123,11 @@ func iAddOfProductToTheCart(quantity, productID string) error {
 
 	lastResponse = recorder
 
-	if recorder.Code != http.StatusOK {
+	if count >= 10 {
+		if recorder.Code != http.StatusBadRequest {
+			return fmt.Errorf("expected status code 400 but got %d: %s", recorder.Code, recorder.Body.String())
+		}
+	} else if recorder.Code != http.StatusOK {
 		return fmt.Errorf("expected status code 200 but got %d: %s", recorder.Code, recorder.Body.String())
 	}
 
@@ -124,22 +136,33 @@ func iAddOfProductToTheCart(quantity, productID string) error {
 
 func theTotalUniqueItemsInTheCartShouldBe(expectedUniqueItems string) error {
 	expected, err := strconv.Atoi(expectedUniqueItems)
-	if err != nil {
-		return err
-	}
 
-	var responseBody map[string]interface{}
-	if err := json.Unmarshal(lastResponse.Body.Bytes(), &responseBody); err != nil {
-		return err
-	}
+	if err == nil {
 
-	uniqueItems, ok := responseBody["total unique items added"].(float64)
-	if !ok {
-		return fmt.Errorf("could not find 'total unique items added' in response")
-	}
+		var responseBody map[string]interface{}
+		if err := json.Unmarshal(lastResponse.Body.Bytes(), &responseBody); err != nil {
+			return err
+		}
 
-	if int(uniqueItems) != expected {
-		return fmt.Errorf("expected %d unique items, but got %d", expected, int(uniqueItems))
+		uniqueItems, ok := responseBody["total unique items added"].(float64)
+		if !ok {
+			return fmt.Errorf("could not find 'total unique items added' in response")
+		}
+
+		if int(uniqueItems) != expected {
+			return fmt.Errorf("expected %d unique items, but got %d", expected, int(uniqueItems))
+		}
+
+	} else {
+
+		if lastResponse.Code != http.StatusBadRequest {
+			return fmt.Errorf("expected status code 400 but got %d: %s", lastResponse.Code, lastResponse.Body.String())
+
+		}
+
+		if !(strings.Contains(lastResponse.Body.String(), "cannot add more than 10 unique items")) {
+			return fmt.Errorf("expected error, %s got, %s", expectedUniqueItems, lastResponse.Body.String())
+		}
 	}
 
 	return nil
@@ -150,6 +173,6 @@ func InitializeAddItemScenario(ctx *godog.ScenarioContext) {
 
 	ctx.Step(`^a product with ID "([^"]*)", name "([^"]*)", price "([^"]*)", and stock "([^"]*)" is available$`, aProductWithIDNamePriceAndStockIsAvailable)
 	ctx.Step(`^I add "([^"]*)" of product "([^"]*)" to the cart$`, iAddOfProductToTheCart)
-	ctx.Step(`^the total unique items in the cart should be "([^"]*)"$`, theTotalUniqueItemsInTheCartShouldBe)
+	ctx.Step(`^the total unique items in the cart should be "([^"]*)", and error should be returned when attempted to add more than 10 unique items$`, theTotalUniqueItemsInTheCartShouldBe)
 
 }

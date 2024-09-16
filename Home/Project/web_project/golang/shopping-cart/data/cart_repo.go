@@ -65,7 +65,7 @@ func (r *CartRepo) AddCartItem(ctx context.Context, productID int32, quantity in
 	}
 
 	if count >= 10 {
-		return int(count), errors.New("cannot add more than 10 unique items to the cart")
+		return int(count), errors.New("cannot add more than 10 unique items")
 
 	}
 
