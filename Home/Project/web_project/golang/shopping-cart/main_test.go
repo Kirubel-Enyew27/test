@@ -6,24 +6,32 @@ import (
 	"testing"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/godog/colors"
 )
+
+func init() {
+	steps.ClearDB()
+}
 
 func TestMain(m *testing.M) {
 	opts := godog.Options{
 		Format: "pretty",
-		Output: colors.Colored(os.Stdout),
 	}
 
-	suite := godog.TestSuite{
-		Name: "user-registration",
+	status := godog.TestSuite{
+		Name: "Shopping Cart",
 		ScenarioInitializer: func(ctx *godog.ScenarioContext) {
-			steps.InitializeScenario(ctx)
+			steps.InitializeAddItemScenario(ctx)
+			steps.InitializeRemoveItemScenario(ctx)
+			steps.InitializeUpdateItemScenario(ctx)
+			steps.InitializeApplyDiscountScenario(ctx)
+			steps.InitializeViewItemsScenario(ctx)
+			steps.InitializeCheckoutScenario(ctx)
 		},
 		Options: &opts,
+	}.Run()
+
+	if st := m.Run(); st > status {
+		status = st
 	}
-
-	status := suite.Run()
-
 	os.Exit(status)
 }

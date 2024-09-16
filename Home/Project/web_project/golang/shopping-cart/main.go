@@ -24,12 +24,13 @@ func main() {
 
 	router := gin.Default()
 
+	router.POST("/products/add", cartHandler.AddProduct)
 	router.POST("/cart/add", cartHandler.AddItem)
 	router.DELETE("/cart/remove/:itemID", cartHandler.RemoveItem)
-	// router.PUT("/cart/update", handler.UpdateItemQuantity)
-	// router.POST("/cart/discount", handler.ApplyDiscount)
-	// router.GET("/cart", handler.ViewCart)
-	// router.POST("/cart/checkout", handler.Checkout)
+	router.PUT("/cart/update", cartHandler.UpdateItemQuantity)
+	router.POST("/cart/discount", cartHandler.ApplyDiscount)
+	router.GET("/cart", cartHandler.ViewCart)
+	router.POST("/cart/checkout", cartHandler.Checkout)
 
 	router.Run(":8080")
 }
